@@ -45,10 +45,11 @@ npm run dev
 
 L'application sera accessible à l'adresse http://localhost:3000 ou http://localhost:8000.
 
-**Configuration**
+## Configuration
 
 Vous pouvez configurer ENSPD Biblio en modifiant les paramètres du fichier `.env`. 
-**Contributions**
+
+## Contributions
 
 ENSPD Biblio est un projet open source. Vous êtes invités à contribuer en soumettant des suggestions, des corrections ou de nouveaux codes. Pour contribuer, suivez les instructions suivantes :
 
