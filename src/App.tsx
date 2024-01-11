@@ -9,6 +9,7 @@ import Layout from "./pages/layout";
 import BooksList from "./components/bookList";
 import NewBook  from "./components/newBook";
 import Register from "./components/NewUser";
+import Search from "./components/search";
 
 function App() {
   return (
@@ -19,9 +20,9 @@ function App() {
             <Route index element={<BooksList/>} />
             <Route path="newbook" element={<NewBook />} />
             <Route path="newuser" element={<Register />} />
+            <Route path="search" element={<Search/>} />
           </Route> }
-      
-        {/* <Route path="/" element={<Layout />} /> */}
+        <Route path="/" element={<Login />} /> 
       </Routes>
     </BrowserRouter>
   );

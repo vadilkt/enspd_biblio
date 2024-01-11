@@ -11,8 +11,10 @@ import edit from "../edit.png";
 import trash from "../trash.png";
 import livre from "../livre-ouvert.png";
 import addLivre from "../ajouter-le-fichier.png";
+import search from "../search.png";
 
 export default {
+  search,
   addLivre,
   livre,
   bank,

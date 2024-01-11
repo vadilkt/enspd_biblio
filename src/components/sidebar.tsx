@@ -3,8 +3,8 @@ import { Link } from "react-router-dom";
 import imgProj from "../assets/img/imgProj";
 
 function SidebarP() {
-  const userRole = "admin";
   const [open, setOpen] = useState(true);
+  const userRole =localStorage.getItem("role");
 
   const Menus = [
     {
@@ -25,9 +25,14 @@ function SidebarP() {
       admin: true,
     },
     {
+      title: "Rechercher un mémoire",
+      src: imgProj.search,
+      link: "/home/search"
+    },
+    {
       title: "Se déconnecter",
       src: imgProj.turnOff,
-      link: "/logout",
+      link: "/",
       admin: false,
       gap: true,
     },

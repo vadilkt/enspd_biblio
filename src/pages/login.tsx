@@ -6,18 +6,13 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 
 const schema = yup.object().shape({
-  email: yup
-    .string()
-    .email("email invalide")
-    .required("Le mail est nécessaire !")
-    .matches(/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,})+$/, {
-      message: "email invalide",
-    }),
-  password: yup.string().required("Ce champs est requis"),
+  noms: yup.string().required("Le nom complet est nécessaire !"),
+  matricule: yup.string().required("Ce champs est requis"),
 });
 
 function Login() {
   const navigate = useNavigate();
+  const [erreurs, setErreurs] = useState<any[]>([]);
 
   const {
     register,
@@ -31,42 +26,57 @@ function Login() {
 
   const onSubmitHandler = (data: any) => {
     console.log(data);
-    Api.post("Login/authenticate", data)
+    Api.post("login", data)
       .then((res) => {
         console.log(res.data);
         localStorage.setItem("token", res.data.token);
+        localStorage.setItem("role", res.data.role);
         reset();
         navigate("/home");
       })
-      .catch((err) => [console.log(err)]);
+      .catch((err) =>{
+        if(err.hasOwnProperty("response")){
+            setErreurs(() => Object.entries(err.response.data.errors).map(([_,messagesList]:any) => messagesList).flat())
+        }else{
+          setErreurs(["Server Error"]);
+        }
+      });
   };
 
   return (
     <div className="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-sm">
         <h1 className="mx-auto h-10 w-auto texl-3xl font-bold ">
-          School Management Sytem
+          ENSPD Biblio
         </h1>
         <h2 className="mt-10  text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
           Connectez vous
         </h2>
         <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+        {
+          erreurs.length ? <div className="bg-red-500 p-4 text-white">
+            <ul>
+              {
+                erreurs.map( erreur => <li> {erreur}</li>)
+              }
+            </ul>
+          </div> : null
+        }
           <form className="space-y-6" onSubmit={handleSubmit(onSubmitHandler)}>
             <div>
               <label
-                htmlFor="email"
+                htmlFor="name"
                 className="block text-start text-sm font-medium leading-6 text-gray-900"
-                placeholder="abc@dgh.xyz"
               >
-                Adresse mail
+                Nom Complet
               </label>
               <div className="mt-2">
                 <input
-                  id="email"
-                  type="email"
-                  autoComplete="email"
+                  id="name"
+                  type="text"
+                  autoComplete="name"
                   required
-                  {...register("email")}
+                  {...register("noms")}
                   className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 />
               </div>
@@ -78,7 +88,7 @@ function Login() {
                   htmlFor="password"
                   className="block text-sm font-medium leading-6 text-gray-900"
                 >
-                  Mot de passe
+                  Mot de passe(Matricule)
                 </label>
               </div>
               <div className="mt-2">
@@ -87,7 +97,7 @@ function Login() {
                   type="password"
                   autoComplete="current-password"
                   required
-                  {...register("password")}
+                  {...register("matricule")}
                   className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 />
               </div>

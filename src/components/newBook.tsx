@@ -12,12 +12,22 @@ const schema = yup
   .object()
   .shape({
     title: yup.string().required("Ce champ est requis !"),
-    field: yup.string().required("Ce champs est requis !"),
-    year: yup.string().required("Ce champs est requis !"),
+    filiere: yup.string().required("Ce champs est requis !"),
+    year: yup.string().required("Ce champs est requis !")
+      .matches(/^[0-9]{4}$/, "Cette année n'est pas valide")
+      .test({
+        name: "year-range",
+        message: "L'année doit être comprise entre 1999 et l'année en cours",
+        test: (value) => {
+          const year = parseInt(value, 10);
+          return !isNaN(year) && year >= 1999 && year <= currentYear;
+        },
+      }),
     authors: yup.string().required("Ajouter un ou plusieurs auteurs séparés par un point-virgule (;)"),
-    pdfLink: yup.string().required("Charger un fichier")
   })
   .required();
+
+const currentYear = new Date().getFullYear();
 
 const token = localStorage.getItem("token");
 const config = {
@@ -25,6 +35,10 @@ const config = {
 };
 const NewBook= () => {
   const [authorsList, setAuthorsList] = useState<string[]>([]);
+  const [file, setFile] = useState<any>();
+  const [erreurs, setErreurs] = useState<any[]>([]);
+
+
   const navigate = useNavigate();
   const {
     register,
@@ -38,28 +52,41 @@ const NewBook= () => {
 
   const onSubmitHandler = (data: any) => {
     console.log(data);
+
+
+    const fd = new FormData();
+
+    for(let k in data){
+      fd.append(k,data[k]);
+    }
+
+    fd.append("pdf",file);
+
     Api.post(
-      "books/register",
-      {
-        title: data.title,
-        year : data.year,
-        authors: authorsList,
-        field: data.field,
-        pdfLink : `http://${data.pdfLink}`
-      },
-      config
+      "books",
+    fd
     )
       .then((res: any) => {
         console.log(res);
         reset();
         navigate("/home/");
       })
-      .catch((err: any) => [console.log(err)]);
+      .catch((err: any) => {
+        if(err.hasOwnProperty("response")){
+          setErreurs(() => Object.entries(err.response.data.errors).map(([_,messagesList]:any) => messagesList).flat())
+      }else{
+        setErreurs(["Server Error"]);
+      }
+      });
   };
 
   const handleAuthorsChange = (e:any)=>{
     const authors = e.target.value.split(";").map((author: string)=> author.trim());
     setAuthorsList(authors);
+  }
+
+  const handleFile = (e: any) => {
+    setFile(e.target.files[0]);
   }
 
   return (
@@ -71,6 +98,15 @@ const NewBook= () => {
               Enregistrer un nouveau mémoire
             </h2>
             <hr/>
+            {
+          erreurs.length ? <div className="bg-red-500 p-4 text-white">
+            <ul>
+              {
+                erreurs.map( erreur => <li> {erreur}</li>)
+              }
+            </ul>
+          </div> : null
+        }
             <div>
               <form onSubmit={handleSubmit(onSubmitHandler)}>
                 <div className="flex flex-grow md:flex-row justify-between">
@@ -91,13 +127,14 @@ const NewBook= () => {
                 <div>
                   <div className="mt-2">
                     <input
-                      type="date"
+                      type="text"
                       autoComplete="year"
                       required
                       placeholder="year"
                       title="Année de rédaction"
                       {...register("year")}
-                      className="pl-2 block text-left w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                      className="pl-2 block text-left w-ful
+                      l rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                     />
                     <p className="text-red-500  text-xs block sm:inline">
                       {errors.year?.message}
@@ -126,7 +163,7 @@ const NewBook= () => {
                 </div>
                 <div className="mt-5 flex flex-col md:flex-row">
                   <select
-                    {...register("field")}
+                    {...register("filiere")}
                     className="pl-2 rounded-tl-lg w-full rounded-tr-lg border-gray-300 shadow-sm md:w-full md:rounded-bl-lg md:rounded-tr-none"
                   >
                     <option data-countrycode="FR" value="">
@@ -149,13 +186,11 @@ const NewBook= () => {
                       type="file"
                       required
                       placeholder=""
-                      {...register("pdfLink")}
+                      onChange={handleFile}
                       title="Votre document"
                       className="pl-2 block text-left w-full rounded-lg border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                     />
-                    <p className="text-red-500  text-xs block sm:inline">
-                      {errors.pdfLink?.message}
-                    </p>
+                    
                   </div>
                 </div>
                 

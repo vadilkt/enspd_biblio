@@ -11,11 +11,11 @@ import { FIELD } from "../utils/departements";
 const schema = yup
   .object()
   .shape({
-    name: yup.string().required("Ce champ est requis !"),
-    field: yup.string().required("Ce champs est requis !"),
+    noms: yup.string().required("Ce champ est requis !"),
+    filiere: yup.string().required("Ce champs est requis !"),
     matricule: yup.string().required("Ce champs est requis !"),
     role: yup.string().required("Choisissez un rôle"),
-    email: yup
+    mail: yup
       .string()
       .email("email invalide")
       .required("email invalide")
@@ -32,7 +32,7 @@ const config = {
 const Register = () => {
   const ROLES = [
     { type: 0, label: "Administrateur"},
-    { type: 1, label: "Etudiant" }
+    { type: 1, label: "Etudiant/Enseignant" }
   ];
   const navigate = useNavigate();
   const {
@@ -48,20 +48,19 @@ const Register = () => {
   const onSubmitHandler = (data: any) => {
     console.log(data);
     Api.post(
-      "Users/register",
+      "users",
       {
         role: data.role,
-        name: data.name,
-        email: data.email,
+        noms: data.noms,
+        mail: data.mail,
         matricule: data.matricule,
-        field: data.field,
-      },
-      config
+        filiere: data.filiere,
+      }
     )
       .then((res: any) => {
         console.log(res);
         reset();
-        navigate("/home/users");
+        navigate("/home");
       })
       .catch((err: any) => [console.log(err)]);
   };
@@ -84,11 +83,11 @@ const Register = () => {
                       autoComplete="nom"
                       required
                       placeholder="Nom(s)"
-                      {...register("name")}
+                      {...register("noms")}
                       className="pl-2 block text-left w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                     />
                     <p className="text-red-500  text-xs block sm:inline">
-                      {errors.name?.message}
+                      {errors.noms?.message}
                     </p>
                   </div>
                 </div>
@@ -100,11 +99,11 @@ const Register = () => {
                       required
                       placeholder="Email"
                       title="Entrez votre adresse mail"
-                      {...register("email")}
+                      {...register("mail")}
                       className="pl-2 block text-left w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                     />
                     <p className="text-red-500  text-xs block sm:inline">
-                      {errors.email?.message}
+                      {errors.mail?.message}
                     </p>
                   </div>
                 </div>
@@ -145,7 +144,7 @@ const Register = () => {
                 </div>
                 <div className="mt-5 flex flex-col md:flex-row">
                   <select
-                    {...register("field")}
+                    {...register("filiere")}
                     className="pl-2 rounded-tl-lg w-full rounded-tr-lg border-gray-300 shadow-sm md:w-full md:rounded-bl-lg md:rounded-tr-none"
                   >
                     <option data-countrycode="FR" value="">
